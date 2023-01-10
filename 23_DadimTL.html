@@ -1,0 +1,71 @@
+<script>
+    (function () {
+        let oldPrice;
+        let currentPrices;
+        const totalPrice = JSON.parse(localStorage.getItem('flashy_cart')).value;
+
+        document.querySelector("#check-out-mini > form > ul:nth-child(3) >.cart_subtotal > span.left > span");
+        var price = parseInt((document.querySelector("#check-out-mini > form > ul:nth-child(3) >.cart_subtotal > span.left > span").textContent));
+        console.log(price);
+    })();
+</script>
+
+<!--ECMA5-->
+<script>
+    (function () {
+        var minPurchase = 399;/*399 min purchase*/
+        var TIME_OUT = 2000;/*2 sec*/
+        var totalPrice;
+        var cartInfo = localStorage.getItem('flashy_cart');
+        if (cartInfo) totalPrice = JSON.parse(cartInfo).value;
+
+        setTimeout(function () {
+            if (totalPrice > minPurchase && window.adoric)
+                window.adoric.trigger('showAdoricBadimtlv');
+        }, TIME_OUT);
+    })();
+</script>
+
+<!--19-12-2022-->
+
+<script>
+    (function () {
+        var minPurchase = 399;/*399 min purchase*/
+        var MIN_TIME_TO_SHOW = 4000;/*4 sec*/
+        var MAXIMUM_WAITING_TIME = 15 * 1000;/*15 seconds*/
+        var totalPrice;
+
+        var waitPageTriggerElement = setInterval(function () {
+            var cartInfo = localStorage.getItem('flashy_cart');
+            if (cartInfo) totalPrice = JSON.parse(cartInfo).value;
+            if (totalPrice > minPurchase && window.adoric && window.adoric.trigger) {
+                setTimeout(function () {
+                    window.adoric.trigger('showAdoricBadimtlv');
+                }, MIN_TIME_TO_SHOW);
+                clearInterval(waitPageTriggerElement);
+            }
+        }, 1000);
+
+        setTimeout(function () {
+            clearInterval(waitPageTriggerElement);
+        }, MAXIMUM_WAITING_TIME);
+
+        document.addEventListener('click', function (event) {
+            var button = event.target.closest('#open-mini-cart');
+            if (button) {
+                console.log('button');
+                setTimeout(function () {
+                    var cartSubtotalAmount = document.querySelector('.cart_subtotal .money');
+                    if (cartSubtotalAmount) cartSubtotalAmount = parseInt(cartSubtotalAmount.textContent.replace(',', ''));
+
+                    if (cartSubtotalAmount > minPurchase && window.adoric && window.adoric.trigger) {
+                        setTimeout(function () {
+                            window.adoric.trigger('showAdoricBadimtlv');
+                        }, MIN_TIME_TO_SHOW);
+                        clearInterval(waitPageTriggerElement);
+                    }
+                }, 2000);
+            }
+        });
+    })();
+</script>

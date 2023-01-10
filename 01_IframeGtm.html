@@ -1,0 +1,58 @@
+<!--iFrame JS-->
+<script>
+    (function () {
+        document.body.addEventListener("click", () => {
+            var progressBar = document.querySelector('[role="progressbar"]');
+            if (!progressBar) return;
+            var currentStep = progressBar.getAttribute('aria-valuenow');
+            var finish = progressBar.getAttribute('aria-valuemax');
+
+            /*if user in last step*/
+            if ((finish - currentStep) === 1) {
+                document.body.addEventListener("click", (event) => {
+                    if (event.target.closest('.forward-button-container') || event.target.closest('.question-footer-wrapper')) {
+                        window.parent.adoric && window.parent.adoric.trigger('coupon_Test_P&G_Turkey');
+                    }
+                });
+
+            }
+        });
+    })();
+</script>
+
+<!--second variation-->
+<!--MAIN GTM  www.kadinlarbilir.com -->
+<script>
+    (function () {
+        window.addEventListener("message", listener);
+
+        function listener(event) {
+            var msg = event.data.toString();
+            if (msg.indexOf('coupon_Test_P&G_Turkey') != -1) {
+                window.adoric.trigger(msg);
+            }
+
+        }
+    })();
+</script>
+
+
+<!-- GTM for iFrame  https://s.kadinlarbilir.com/6du423/-->
+<script>
+    (function () {
+        document.body.addEventListener("click", () => {
+            var progressBar = document.querySelector('[role="progressbar"]');
+            if (!progressBar) return;
+            var currentStep = progressBar.getAttribute('aria-valuenow');
+            var finish = progressBar.getAttribute('aria-valuemax');
+            if ((finish - currentStep) === 1) {
+                document.body.addEventListener("click", (event) => {
+                    if (event.target.closest('.forward-button-container') || event.target.closest('.question-footer-wrapper')) {
+                        window.parent.postMessage('coupon_Test_P&G_Turkey', '*');
+                    }
+                });
+
+            }
+        });
+    })();
+</script>

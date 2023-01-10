@@ -1,0 +1,65 @@
+<script>
+    (async function () {
+        let TIME_OUT = 200;/*2 sec*/
+        const URL_GET = 'https://feeds.datafeedwatch.com/60212/93d6261ffbf7431d3d63b5f9fd3786a4521c62aa.json';
+        window.sessionStorage.removeItem('showAdoricAldoByProductList');
+        try {
+            let response = await fetch(URL_GET);
+            if (response.ok) {
+                let resp = await response.json();
+                let products = resp['products'];
+                const curentUrlInProductList = products.find(function (productFromList) {
+                    return new URL(productFromList.link).pathname == (window.location.pathname);
+                });
+
+                setTimeout(() => {
+                    if (curentUrlInProductList && window.adoric) {
+                        window.adoric.trigger('showAdoricAldoByProductList');
+                        console.log('!!', !!curentUrlInProductList);
+                        console.log('showAdoricAldoByProductList', curentUrlInProductList);
+                    }
+                }, TIME_OUT);
+            } else console.log("Network Error " + response.status);
+        } catch
+            (error) {
+            console.log(error);
+        }
+    })();
+</script>
+
+<!--ECMA5-->
+<script>
+    (function () {
+        let TIME_OUT = 200;/*2 sec*/
+        var url = 'https://feeds.datafeedwatch.com/60212/93d6261ffbf7431d3d63b5f9fd3786a4521c62aa.json';
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+        xhr.responseType = 'json';
+        try {
+            xhr.send();
+            xhr.onload = function () {
+                if (xhr.status == 200) {
+                    var products = xhr.response['products'];
+                    var curentUrlInProductList = false;
+
+                    for (var i = 0; i < products.length; i++) {
+                        if ((new URL(products[i].link).pathname) == window.location.pathname) {
+                            curentUrlInProductList = true;
+                            break;
+                        }
+                    }
+
+
+                    setTimeout(() => {
+                        if (curentUrlInProductList && window.adoric) {
+                            window.adoric.trigger('showAdoricAldoByProductList');
+                        }
+                    }, TIME_OUT);
+                }
+            };
+        } catch
+            (error) {
+            console.log(error);
+        }
+    })();
+</script>

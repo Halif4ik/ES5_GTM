@@ -1,0 +1,169 @@
+<style>
+  #adoric_smartbox_81ed0a8f37bcf .canvasContainer {
+    position: relative;
+    z-index: 9999999999;
+  }
+  #adoric_smartbox_81ed0a8f37bcf .adoric_element.element-embed {
+    z-index: 105 !important;
+  }
+
+  #adoric_smartbox_81ed0a8f37bcf {
+    z-index: 9999999999;
+  }
+
+  #adoric_smartbox_81ed0a8f37bcf .canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+</style>
+<div class="canvasContainer">
+  <canvas class="canvas" id="js-canvas" width="304" height="304"></canvas>
+</div>
+<script>
+  (function () {
+    /*'use strict';*/
+    const LIMIT_TO_SHOW_ALL_PERCENTAGE = 60;
+    const urlHoverImage = 'https://static.adoric.com/fef7795e-e44b-4088-83c9-b348accf43e7.png';
+    const brushDimention = 50;
+    let isDrawing, lastPoint, tabIndex = document.querySelector('.' + self.identifier + '.__ADORIC__ [tabindex]'),
+            canvasContainer = tabIndex.querySelector('.canvasContainer'),
+            canvasElement = document.getElementById('js-canvas'),
+            embedDimention = canvasElement.closest('.element-embed'),
+            /*if we take large image shold increment this because many pixel will check*/
+            COUNT_SKIP_PIXEL_IN_CHEK_SCRETCH = 32,
+            CANVAS_WIDTH, CANVAS_HEIGHT, ctx = canvasElement.getContext('2d'),
+            COVER_IMAGE, brush;
+    const textHover = [];
+    const TEXT_FROM_CANVAS = tabIndex.querySelectorAll('.adoric_element.element-text>SPAN');
+
+
+    let loadImg = (src) => new Promise(resolve => {
+      const image = new Image();
+      image.setAttribute('crossOrigin', ''); /*image.crossOrigin = "Anonymous";*/
+      image.onload = () => resolve(image);
+    image.src = src;
+  });
+    main();
+    async function main() {
+      COVER_IMAGE = await loadImg(urlHoverImage);
+      brush = await loadImg('https://storage.googleapis.com/adoric-user-images/d7581afd-78ac-41a1-883c-191a1b835706.png');
+      /*take dimentions from embed size and set in canvas*/
+      CANVAS_WIDTH = canvasElement.width = embedDimention.clientWidth;
+      CANVAS_HEIGHT = canvasElement.height = embedDimention.clientHeight;
+      ctx.drawImage(COVER_IMAGE, 0, 0, canvasElement.width, canvasElement.height); /*set text in center canvas */
+
+      /*draw text*/
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      TEXT_FROM_CANVAS.forEach(oneString => {
+        textHover.push({
+          content: oneString.textContent,
+          fontColor: oneString.style.color,
+          fontSize: oneString.style.fontSize,
+          fontStyle: oneString.style.fontStyle,
+          fontFamily: oneString.style.fontFamily,
+          XCenter: oneString.parentElement.offsetLeft + oneString.parentElement.clientWidth / 2,
+          Ycor: oneString.parentElement.offsetTop,
+        });
+        /*hidden native text on canvas from campaign*/
+        oneString.style.visibility = 'hidden';
+        if(oneString.firstElementChild) oneString.firstElementChild.style.visibility = 'hidden';
+    });
+
+      for (let i = 0; i < textHover.length; i++) {
+        ctx.fillStyle = textHover[i].fontColor;
+        ctx.font = `${textHover[i].fontStyle} ${textHover[i].fontSize} ${textHover[i].fontFamily}`;
+        let oneRow = textHover[i].content;
+        ctx.fillText(oneRow, textHover[i].XCenter, textHover[i].Ycor);
+      }
+    } /*hide cover image from redactor*/
+    tabIndex.querySelectorAll('.element-image').forEach((wrapperImg) => {
+      if (wrapperImg.querySelector('IMG').src.includes(urlHoverImage)) wrapperImg.style.display = 'none';
+  });
+    canvasElement.addEventListener('mousedown', handleMouseDown);
+    canvasElement.addEventListener('touchstart', handleMouseDown);
+    canvasElement.addEventListener('mousemove', handleMouseMove);
+    canvasElement.addEventListener('touchmove', handleMouseMove);
+    canvasElement.addEventListener('mouseup', handleMouseUp);
+    canvasElement.addEventListener('touchend', handleMouseUp);
+
+    function handleMouseDown(event) {
+      isDrawing = true;
+      lastPoint = getMouseСoordinates(event, canvasElement);
+    }
+    /*mousedown coordinates take and calculete cord from border Adoric*/
+    function getMouseСoordinates(event, canvas) {
+      var offsetX = 0,
+              offsetY = window.scrollY,
+              mx, my;
+      if (canvas.offsetParent !== undefined) {
+        do {
+          offsetX += canvas.offsetLeft;
+          offsetY += canvas.offsetTop; /* while has Pearent with positions, we up on top*/
+        } while ((canvas = canvas.offsetParent));
+      }
+      mx = (event.pageX || event.touches[0].pageX) - offsetX;
+      my = (event.pageY || event.touches[0].pageY) - offsetY;
+      return {
+        x: mx,
+        y: my
+      };
+    }
+
+    function distanceBetween(point1, point2) {
+      return Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
+    }
+
+    function angleBetween(point1, point2) {
+      return Math.atan2(point2.x - point1.x, point2.y - point1.y);
+    } /* Only test every `stride` pixel. `stride`x faster, but might lead to inaccuracy */
+    function getFilledInPixels(stride) {
+      if (!stride || stride < 1) stride = 1;
+      var pixels = ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT),
+              pdata = pixels.data,
+              len = pdata.length,
+              totalLenthPixelWhatWillCount = (len / stride),
+              count = 0; /* Iterate over all pixels l=160 000 */
+      for (var i = 0; i < len; i += stride) {
+        if (parseInt(pdata[i]) === 0) count++;
+      }
+      return Math.round((count / totalLenthPixelWhatWillCount) * 100);
+    }
+
+    function handlePercentage(filledInPixels) {
+      filledInPixels = filledInPixels || 0; /* console.log(filledInPixels + '%');*/
+      if (filledInPixels > LIMIT_TO_SHOW_ALL_PERCENTAGE + 1) {
+        return null;
+      }
+      if (filledInPixels > LIMIT_TO_SHOW_ALL_PERCENTAGE) {
+        setTimeout(function () {
+          if (canvasElement && canvasElement.parentNode) {
+            canvasElement.parentNode.removeChild(canvasElement);
+            canvasContainer.style.zIndex = '0';
+          }
+        }, 100);
+      }
+    } /*when moving above canvas*/
+    function handleMouseMove(e) {
+      if (!isDrawing) return;
+      e.preventDefault();
+      var currentPoint = getMouseСoordinates(e, canvasElement),
+              dist = distanceBetween(lastPoint, currentPoint),
+              angle = angleBetween(lastPoint, currentPoint),
+              x, y;
+      for (var i = 0; i < dist; i++) {
+        x = lastPoint.x + (Math.sin(angle) * i) - 25;
+        y = lastPoint.y + (Math.cos(angle) * i) - 25;
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.drawImage(brush, x, y, brushDimention, brushDimention);
+      }
+      lastPoint = currentPoint;
+      handlePercentage(getFilledInPixels(COUNT_SKIP_PIXEL_IN_CHEK_SCRETCH));
+    }
+
+    function handleMouseUp() {
+      isDrawing = false;
+    }
+  })();
+</script>

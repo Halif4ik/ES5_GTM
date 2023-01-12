@@ -1,8 +1,8 @@
 <script>
     (function () {
-        let oldPrice;
-        let currentPrices;
-        const totalPrice = JSON.parse(localStorage.getItem('flashy_cart')).value;
+        var oldPrice;
+        var currentPrices;
+        var totalPrice = JSON.parse(localStorage.getItem('flashy_cart')).value;
 
         document.querySelector("#check-out-mini > form > ul:nth-child(3) >.cart_subtotal > span.left > span");
         var price = parseInt((document.querySelector("#check-out-mini > form > ul:nth-child(3) >.cart_subtotal > span.left > span").textContent));

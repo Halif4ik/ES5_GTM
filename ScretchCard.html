@@ -51,24 +51,26 @@
       /*take dimentions from embed size and set in canvas*/
       CANVAS_WIDTH = canvasElement.width = embedDimention.clientWidth;
       CANVAS_HEIGHT = canvasElement.height = embedDimention.clientHeight;
-      ctx.drawImage(COVER_IMAGE, 0, 0, canvasElement.width, canvasElement.height); /*set text in center canvas */
+      ctx.drawImage(COVER_IMAGE, 0, 0, canvasElement.width, canvasElement.height);
+      /*set text in center canvas */
 
       /*draw text*/
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      TEXT_FROM_CANVAS.forEach(oneString => {
+      TEXT_FROM_CANVAS.forEach(oneStringSpan => {
         textHover.push({
-          content: oneString.textContent,
-          fontColor: oneString.style.color,
-          fontSize: oneString.style.fontSize,
-          fontStyle: oneString.style.fontStyle,
-          fontFamily: oneString.style.fontFamily,
-          XCenter: oneString.parentElement.offsetLeft + oneString.parentElement.clientWidth / 2,
-          Ycor: oneString.parentElement.offsetTop,
+          content: oneStringSpan.textContent,
+          fontColor: oneStringSpan.style.color,
+          fontSize: oneStringSpan.style.fontSize,
+          fontStyle: oneStringSpan.style.fontStyle,
+          fontFamily: oneStringSpan.style.fontFamily,
+          XCenter: oneStringSpan.parentElement.offsetLeft + oneStringSpan.parentElement.clientWidth / 2,
+          Ycor: oneStringSpan.parentElement.offsetTop,
         });
         /*hidden native text on canvas from campaign*/
-        oneString.style.visibility = 'hidden';
-        if(oneString.firstElementChild) oneString.firstElementChild.style.visibility = 'hidden';
+        oneStringSpan.style.visibility = 'hidden';
+        oneStringSpan.parentElement.style.visibility = 'hidden';
+        if(oneStringSpan.firstElementChild) oneStringSpan.firstElementChild.style.visibility = 'hidden';
     });
 
       for (let i = 0; i < textHover.length; i++) {

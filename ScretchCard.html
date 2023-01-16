@@ -28,6 +28,7 @@
     const brushDimention = 50;
     let isDrawing, lastPoint, tabIndex = document.querySelector('.' + self.identifier + '.__ADORIC__ [tabindex]'),
             canvasContainer = tabIndex.querySelector('.canvasContainer'),
+            embedCode = canvasContainer.closest('.element-embed'),
             canvasElement = document.getElementById('js-canvas'),
             embedDimention = canvasElement.closest('.element-embed'),
             /*if we take large image shold increment this because many pixel will check*/
@@ -143,6 +144,7 @@
           if (canvasElement && canvasElement.parentNode) {
             canvasElement.parentNode.removeChild(canvasElement);
             canvasContainer.style.zIndex = '0';
+            embedCode.style.setProperty('z-index','0','important');
           }
         }, 100);
       }

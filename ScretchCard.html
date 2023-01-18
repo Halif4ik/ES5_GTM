@@ -3,6 +3,7 @@
     position: relative;
     z-index: 9999999999;
   }
+
   #adoric_smartbox_81ed0a8f37bcf .adoric_element.element-embed {
     z-index: 105 !important;
   }
@@ -23,8 +24,8 @@
 <script>
   (function () {
     /*'use strict';*/
-    const LIMIT_TO_SHOW_ALL_PERCENTAGE = 60;
-    const urlHoverImage = 'https://static.adoric.com/fef7795e-e44b-4088-83c9-b348accf43e7.png';
+    const LIMIT_TO_SHOW_ALL_PERCENTAGE = 80;
+    const urlHoverImage = 'https://static.adoric.com/b5c40138-46fc-40ff-b078-029616051328.jpg';
     const brushDimention = 50;
     let isDrawing, lastPoint, tabIndex = document.querySelector('.' + self.identifier + '.__ADORIC__ [tabindex]'),
             canvasContainer = tabIndex.querySelector('.canvasContainer'),
@@ -38,6 +39,12 @@
     const textHover = [];
     const TEXT_FROM_CANVAS = tabIndex.querySelectorAll('.adoric_element.element-text>SPAN');
 
+    let checkAdditionalTabindex = () => {
+      const lb = tabIndex.parentElement;
+      const sibling = lb.previousElementSibling;
+      if (sibling.className.includes(lb.className.split(' ')[0])) sibling.remove();
+    };
+    checkAdditionalTabindex();
 
     let loadImg = (src) => new Promise(resolve => {
       const image = new Image();
@@ -46,12 +53,15 @@
     image.src = src;
   });
     main();
+
     async function main() {
       COVER_IMAGE = await loadImg(urlHoverImage);
       brush = await loadImg('https://storage.googleapis.com/adoric-user-images/d7581afd-78ac-41a1-883c-191a1b835706.png');
       /*take dimentions from embed size and set in canvas*/
       CANVAS_WIDTH = canvasElement.width = embedDimention.clientWidth;
       CANVAS_HEIGHT = canvasElement.height = embedDimention.clientHeight;
+      console.log('canvasElement.width', canvasElement.width);
+      console.log('height', canvasElement.height);
       ctx.drawImage(COVER_IMAGE, 0, 0, canvasElement.width, canvasElement.height);
       /*set text in center canvas */
 
@@ -71,7 +81,7 @@
         /*hidden native text on canvas from campaign*/
         oneStringSpan.style.visibility = 'hidden';
         oneStringSpan.parentElement.style.visibility = 'hidden';
-        if(oneStringSpan.firstElementChild) oneStringSpan.firstElementChild.style.visibility = 'hidden';
+        if (oneStringSpan.firstElementChild) oneStringSpan.firstElementChild.style.visibility = 'hidden';
     });
 
       for (let i = 0; i < textHover.length; i++) {
@@ -80,7 +90,9 @@
         let oneRow = textHover[i].content;
         ctx.fillText(oneRow, textHover[i].XCenter, textHover[i].Ycor);
       }
-    } /*hide cover image from redactor*/
+    }
+
+    /*hide cover image from redactor*/
     tabIndex.querySelectorAll('.element-image').forEach((wrapperImg) => {
       if (wrapperImg.querySelector('IMG').src.includes(urlHoverImage)) wrapperImg.style.display = 'none';
   });
@@ -93,8 +105,9 @@
 
     function handleMouseDown(event) {
       isDrawing = true;
-      lastPoint = getMouseСoordinates(event, canvasElement);
+      lastPoint = getMouseСoordinates(event, this);
     }
+
     /*mousedown coordinates take and calculete cord from border Adoric*/
     function getMouseСoordinates(event, canvas) {
       var offsetX = 0,
@@ -144,7 +157,7 @@
           if (canvasElement && canvasElement.parentNode) {
             canvasElement.parentNode.removeChild(canvasElement);
             canvasContainer.style.zIndex = '0';
-            embedCode.style.setProperty('z-index','0','important');
+            embedCode.style.setProperty('z-index', '0', 'important');
           }
         }, 100);
       }
@@ -169,5 +182,6 @@
     function handleMouseUp() {
       isDrawing = false;
     }
-  })();
+  })
+  ();
 </script>

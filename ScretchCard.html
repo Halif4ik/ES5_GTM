@@ -14,37 +14,52 @@
 
   #adoric_smartbox_81ed0a8f37bcf .canvas {
     position: absolute;
-    top: 0;
-    left: 0;
+  }
+
+  #adoric_smartbox_81ed0a8f37bcf .element-image Picture {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
   }
 </style>
 <div class="canvasContainer">
-  <canvas class="canvas" id="js-canvas" width="304" height="304"></canvas>
+  <canvas class="canvas" width="304" height="304"></canvas>
 </div>
 <script>
   (function () {
     /*'use strict';*/
-    const LIMIT_TO_SHOW_ALL_PERCENTAGE = 80;
-    const urlHoverImage = 'https://static.adoric.com/b5c40138-46fc-40ff-b078-029616051328.jpg';
+    const LIMIT_TO_SHOW_ALL_PERCENTAGE = 60;
+    const urlCoverImage = 'https://static.adoric.com/fef7795e-e44b-4088-83c9-b348accf43e7.png';
     const brushDimention = 50;
     let isDrawing, lastPoint, tabIndex = document.querySelector('.' + self.identifier + '.__ADORIC__ [tabindex]'),
             canvasContainer = tabIndex.querySelector('.canvasContainer'),
-            embedCode = canvasContainer.closest('.element-embed'),
-            canvasElement = document.getElementById('js-canvas'),
-            embedDimention = canvasElement.closest('.element-embed'),
+            canvasElement = tabIndex.querySelector('.canvasContainer .canvas'),
+            embedCode = canvasElement.closest('.element-embed'),
             /*if we take large image shold increment this because many pixel will check*/
             COUNT_SKIP_PIXEL_IN_CHEK_SCRETCH = 32,
-            CANVAS_WIDTH, CANVAS_HEIGHT, ctx = canvasElement.getContext('2d'),
-            COVER_IMAGE, brush;
+            CANVAS_WIDTH, CANVAS_HEIGHT, COVER_IMAGE, brush, ctx;
+    const backgroundImages = tabIndex.querySelectorAll('.element-image');
+    const arrayCanvas = [];
     const textHover = [];
     const TEXT_FROM_CANVAS = tabIndex.querySelectorAll('.adoric_element.element-text>SPAN');
 
-    let checkAdditionalTabindex = () => {
-      const lb = tabIndex.parentElement;
-      const sibling = lb.previousElementSibling;
-      if (sibling.className.includes(lb.className.split(' ')[0])) sibling.remove();
-    };
-    checkAdditionalTabindex();
+    /*hide winner code and another text above canvas*/
+    const WINNER_CODE = tabIndex.querySelector('.adoric_element.element-text>a>SPAN');
+    WINNER_CODE.style.display = 'none';
+    TEXT_FROM_CANVAS.forEach(oneStringSpan => {
+      textHover.push({
+        content: oneStringSpan.textContent,
+        fontColor: oneStringSpan.style.color,
+        fontSize: oneStringSpan.style.fontSize,
+        fontStyle: oneStringSpan.style.fontStyle,
+        fontFamily: oneStringSpan.style.fontFamily,
+        XCenter: oneStringSpan.parentElement.offsetLeft + oneStringSpan.parentElement.clientWidth / 2,
+        Ycor: oneStringSpan.parentElement.offsetTop,
+      });
+      oneStringSpan.style.visibility = 'hidden';
+      oneStringSpan.parentElement.style.visibility = 'hidden';
+      if (oneStringSpan.firstElementChild) oneStringSpan.firstElementChild.style.visibility = 'hidden';
+  });
 
     let loadImg = (src) => new Promise(resolve => {
       const image = new Image();
@@ -52,60 +67,66 @@
       image.onload = () => resolve(image);
     image.src = src;
   });
-    main();
 
-    async function main() {
-      COVER_IMAGE = await loadImg(urlHoverImage);
-      brush = await loadImg('https://storage.googleapis.com/adoric-user-images/d7581afd-78ac-41a1-883c-191a1b835706.png');
-      /*take dimentions from embed size and set in canvas*/
-      CANVAS_WIDTH = canvasElement.width = embedDimention.clientWidth;
-      CANVAS_HEIGHT = canvasElement.height = embedDimention.clientHeight;
-      console.log('canvasElement.width', canvasElement.width);
-      console.log('height', canvasElement.height);
+    /*decide what canvas we selected and delete another listeners, assign canvas to global variable */
+    const selectCanvas = (event) => {
+      canvasElement = event.target;
+      ctx = event.target.getContext('2d');
+      arrayCanvas.forEach(canvas => {
+        canvas.removeEventListener('mousedown', selectCanvas);
+        canvas.removeEventListener('touchstart', selectCanvas);
+      });
+      handleMouseDown(event);
+      WINNER_CODE.style.display = 'block';
+      /*start native functional*/
+      canvasElement.addEventListener('mousedown', handleMouseDown);
+      canvasElement.addEventListener('touchstart', handleMouseDown);
+      canvasElement.addEventListener('mousemove', handleMouseMove);
+      canvasElement.addEventListener('touchmove', handleMouseMove);
+      canvasElement.addEventListener('mouseup', handleMouseUp);
+      canvasElement.addEventListener('touchend', handleMouseUp);
+    };
+
+    const main = async () => {
+      COVER_IMAGE = await loadImg(urlCoverImage);
+      brush = await loadImg('https://storage.googleapis.com/adoric-user-images/d7581afd-78ac-41a1-883c-191a1b835706.png'); /* take dimensions from embed size and set in canvas*/
+      backgroundImages.forEach((backgroundImg, index) => {
+        if (index > 0) {
+        var nextCanvasContainer = canvasContainer.cloneNode(true);
+        var newCanvasElement = nextCanvasContainer.firstElementChild;
+        newCanvasElement.style.left = backgroundImg.offsetLeft + 'px';
+        newCanvasElement.style.top = backgroundImg.offsetTop + 'px';
+        canvasContainer.after(nextCanvasContainer);
+        canvasElement = newCanvasElement;
+      }
+      CANVAS_WIDTH = canvasElement.width = embedCode.clientWidth;
+      CANVAS_HEIGHT = canvasElement.height = embedCode.clientHeight;
+      ctx = canvasElement.getContext('2d');
       ctx.drawImage(COVER_IMAGE, 0, 0, canvasElement.width, canvasElement.height);
-      /*set text in center canvas */
-
-      /*draw text*/
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      TEXT_FROM_CANVAS.forEach(oneStringSpan => {
-        textHover.push({
-          content: oneStringSpan.textContent,
-          fontColor: oneStringSpan.style.color,
-          fontSize: oneStringSpan.style.fontSize,
-          fontStyle: oneStringSpan.style.fontStyle,
-          fontFamily: oneStringSpan.style.fontFamily,
-          XCenter: oneStringSpan.parentElement.offsetLeft + oneStringSpan.parentElement.clientWidth / 2,
-          Ycor: oneStringSpan.parentElement.offsetTop,
-        });
-        /*hidden native text on canvas from campaign*/
-        oneStringSpan.style.visibility = 'hidden';
-        oneStringSpan.parentElement.style.visibility = 'hidden';
-        if (oneStringSpan.firstElementChild) oneStringSpan.firstElementChild.style.visibility = 'hidden';
+      arrayCanvas.push(canvasElement);
+      canvasElement.addEventListener('mousedown', selectCanvas);
+      canvasElement.addEventListener('touchstart', selectCanvas);
     });
 
       for (let i = 0; i < textHover.length; i++) {
+        console.log(`textHover[${i}]`, textHover[i]);
         ctx.fillStyle = textHover[i].fontColor;
         ctx.font = `${textHover[i].fontStyle} ${textHover[i].fontSize} ${textHover[i].fontFamily}`;
         let oneRow = textHover[i].content;
         ctx.fillText(oneRow, textHover[i].XCenter, textHover[i].Ycor);
       }
-    }
-
+    };
+    main();
     /*hide cover image from redactor*/
     tabIndex.querySelectorAll('.element-image').forEach((wrapperImg) => {
-      if (wrapperImg.querySelector('IMG').src.includes(urlHoverImage)) wrapperImg.style.display = 'none';
+      if (wrapperImg.querySelector('IMG').src.includes(urlCoverImage)) wrapperImg.style.display = 'none';
   });
-    canvasElement.addEventListener('mousedown', handleMouseDown);
-    canvasElement.addEventListener('touchstart', handleMouseDown);
-    canvasElement.addEventListener('mousemove', handleMouseMove);
-    canvasElement.addEventListener('touchmove', handleMouseMove);
-    canvasElement.addEventListener('mouseup', handleMouseUp);
-    canvasElement.addEventListener('touchend', handleMouseUp);
 
     function handleMouseDown(event) {
       isDrawing = true;
-      lastPoint = getMouseСoordinates(event, this);
+      console.log('this', this);
+      /*lastPoint = getMouseСoordinates(event, this); todo*/
+      lastPoint = getMouseСoordinates(event, canvasElement);
     }
 
     /*mousedown coordinates take and calculete cord from border Adoric*/
@@ -121,6 +142,11 @@
       }
       mx = (event.pageX || event.touches[0].pageX) - offsetX;
       my = (event.pageY || event.touches[0].pageY) - offsetY;
+      /*  console.log('event.pageX-', event.touches[0].pageX);
+        console.log('offsetX-', offsetX);
+        console.log('offsetY-', offsetY);
+        console.log('mx-', mx);
+        console.log('my-', my);*/
       return {
         x: mx,
         y: my
@@ -133,7 +159,9 @@
 
     function angleBetween(point1, point2) {
       return Math.atan2(point2.x - point1.x, point2.y - point1.y);
-    } /* Only test every `stride` pixel. `stride`x faster, but might lead to inaccuracy */
+    }
+
+    /* Only test every `stride` pixel. `stride`x faster, but might lead to inaccuracy */
     function getFilledInPixels(stride) {
       if (!stride || stride < 1) stride = 1;
       var pixels = ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT),
@@ -157,7 +185,6 @@
           if (canvasElement && canvasElement.parentNode) {
             canvasElement.parentNode.removeChild(canvasElement);
             canvasContainer.style.zIndex = '0';
-            embedCode.style.setProperty('z-index', '0', 'important');
           }
         }, 100);
       }
@@ -182,6 +209,5 @@
     function handleMouseUp() {
       isDrawing = false;
     }
-  })
-  ();
+  })();
 </script>

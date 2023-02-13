@@ -1,0 +1,42 @@
+<!--ECMA5-->
+<script>
+    (function () {
+        var minTotalPrice = 300;
+        var maxTotalPrice = 350;
+        var MIN_TIME_TO_SHOW = 3000;/*3 sec*/
+        var MAXIMUM_WAITING_TIME = 8 * 1000;/*8 seconds*/
+        var currentTotalPrice;
+
+        /*check when the user opens page*/
+        var waitPageTriggerElement = setInterval(function () {
+            var cartInfo = localStorage.getItem('flashy_cart');
+            if (cartInfo) currentTotalPrice = Math.round(JSON.parse(cartInfo).value);
+            if (currentTotalPrice > minTotalPrice && currentTotalPrice < maxTotalPrice && window.adoric && window.adoric.trigger) {
+                localStorage.setItem('adoricShipmentPopup', maxTotalPrice - currentTotalPrice);
+                setTimeout(function () {
+                    window.adoric.trigger('showAdoricBadimtShipmentPopup');
+                }, MIN_TIME_TO_SHOW);
+                clearInterval(waitPageTriggerElement);
+            }
+        }, 1000);
+        setTimeout(function () {
+            clearInterval(waitPageTriggerElement);
+        }, MAXIMUM_WAITING_TIME);
+
+        /*check when the user clicks buy merchandise*/
+        document.addEventListener('click', function (event) {
+            var button = event.target.closest('#open-mini-cart');
+            if (button) {
+                setTimeout(function () {
+                    var cartSubtotalAmount = document.querySelector('.cart_subtotal .money');
+                    if (cartSubtotalAmount) cartSubtotalAmount = parseInt(cartSubtotalAmount.textContent.replace(',', '.'));
+                    if (cartSubtotalAmount > minTotalPrice && cartSubtotalAmount < maxTotalPrice && window.adoric && window.adoric.trigger) {
+                        localStorage.setItem('adoricShipmentPopup', maxTotalPrice - cartSubtotalAmount);
+                        window.adoric.trigger('showAdoricBadimtShipmentPopup');
+                        clearInterval(waitPageTriggerElement);
+                    }
+                }, MIN_TIME_TO_SHOW);
+            }
+        });
+    })();
+</script>

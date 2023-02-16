@@ -65,7 +65,7 @@
       });
       handleMouseDown(event);
       if (WINNER_CODE) WINNER_CODE.style.display = 'block';
-      /*start native functional*/
+      /*start native functionality*/
       canvasElement.addEventListener('mousedown', handleMouseDown);
       canvasElement.addEventListener('touchstart', handleMouseDown);
       canvasElement.addEventListener('mousemove', handleMouseMove);
@@ -78,24 +78,30 @@
       COVER_IMAGE = await loadImg(urlCoverImage);
       brush = await loadImg('https://storage.googleapis.com/adoric-user-images/d7581afd-78ac-41a1-883c-191a1b835706.png'); /* take dimensions from embed size and set in canvas*/
 
-      backgroundImages.forEach((backgroundImg, index, arr) => {
+      const canvasArr = [];
+      canvasArr.push(canvasElement);
+      backgroundImages.forEach((backgroundImg, index) => {
         if (index > 0) {
         var nextCanvasContainer = canvasContainer.cloneNode(true);
         var newCanvasElement = nextCanvasContainer.firstElementChild;
         newCanvasElement.style.left = backgroundImg.offsetLeft + 'px';
         newCanvasElement.style.top = backgroundImg.offsetTop + 'px';
         canvasContainer.after(nextCanvasContainer);
-        canvasElement = newCanvasElement;
+        canvasArr.push(newCanvasElement);
       }
-      CANVAS_WIDTH = canvasElement.width = embedCode.clientWidth;
-      CANVAS_HEIGHT = canvasElement.height = embedCode.clientHeight;
-      ctx = canvasElement.getContext('2d');
-      ctx.drawImage(COVER_IMAGE, 0, 0, canvasElement.width, canvasElement.height);
-      drawTextInsertHoverIMG(ctx);
-      arrayCanvas.push(canvasElement);
-      canvasElement.addEventListener('mousedown', selectCanvas);
-      canvasElement.addEventListener('touchstart', selectCanvas);
     });
+
+      backgroundImages.forEach((backgroundImg, i) => {
+        canvasElement = canvasArr[i];
+        CANVAS_WIDTH = canvasElement.width = embedCode.clientWidth;
+        CANVAS_HEIGHT = canvasElement.height = embedCode.clientHeight;
+        ctx = canvasElement.getContext('2d');
+        ctx.drawImage(COVER_IMAGE, 0, 0, canvasElement.width, canvasElement.height);
+        drawTextInsertHoverIMG(ctx);
+        arrayCanvas.push(canvasElement);
+        canvasElement.addEventListener('mousedown', selectCanvas);
+        canvasElement.addEventListener('touchstart', selectCanvas);
+      });
     };
     main();
 

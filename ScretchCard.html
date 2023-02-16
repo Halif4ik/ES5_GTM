@@ -41,25 +41,13 @@
     const backgroundImages = tabIndex.querySelectorAll('.element-image');
     const arrayCanvas = [];
     const textHover = [];
-    const TEXT_FROM_CANVAS = tabIndex.querySelectorAll('.adoric_element.element-text>SPAN');
 
-    /*hide winner code and another text above canvas*/
-    const WINNER_CODE = tabIndex.querySelector('.adoric_element.element-text>a>SPAN');
-    WINNER_CODE.style.display = 'none';
-    TEXT_FROM_CANVAS.forEach(oneStringSpan => {
-      textHover.push({
-        content: oneStringSpan.textContent,
-        fontColor: oneStringSpan.style.color,
-        fontSize: oneStringSpan.style.fontSize,
-        fontStyle: oneStringSpan.style.fontStyle,
-        fontFamily: oneStringSpan.style.fontFamily,
-        XCenter: oneStringSpan.parentElement.offsetLeft + oneStringSpan.parentElement.clientWidth / 2,
-        Ycor: oneStringSpan.parentElement.offsetTop,
-      });
-      oneStringSpan.style.visibility = 'hidden';
-      oneStringSpan.parentElement.style.visibility = 'hidden';
-      if (oneStringSpan.firstElementChild) oneStringSpan.firstElementChild.style.visibility = 'hidden';
-  });
+    /*hide winner code and another text above canvas */
+    const WINNER_CODE = tabIndex.querySelector('.winnercode SPAN');
+    if (WINNER_CODE) WINNER_CODE.style.display = 'none';
+
+    const TEXT_FROM_CANVAS = tabIndex.querySelectorAll('.element-text>SPAN, .element-text>SPAN FONT');
+
 
     let loadImg = (src) => new Promise(resolve => {
       const image = new Image();
@@ -67,17 +55,16 @@
       image.onload = () => resolve(image);
     image.src = src;
   });
-
     /*decide what canvas we selected and delete another listeners, assign canvas to global variable */
-    const selectCanvas = (event) => {
+    const selectCanvas = event => {
       canvasElement = event.target;
-      ctx = event.target.getContext('2d');
+      ctx = canvasElement.getContext('2d');
       arrayCanvas.forEach(canvas => {
         canvas.removeEventListener('mousedown', selectCanvas);
         canvas.removeEventListener('touchstart', selectCanvas);
       });
       handleMouseDown(event);
-      WINNER_CODE.style.display = 'block';
+      if (WINNER_CODE) WINNER_CODE.style.display = 'block';
       /*start native functional*/
       canvasElement.addEventListener('mousedown', handleMouseDown);
       canvasElement.addEventListener('touchstart', handleMouseDown);
@@ -90,7 +77,8 @@
     const main = async () => {
       COVER_IMAGE = await loadImg(urlCoverImage);
       brush = await loadImg('https://storage.googleapis.com/adoric-user-images/d7581afd-78ac-41a1-883c-191a1b835706.png'); /* take dimensions from embed size and set in canvas*/
-      backgroundImages.forEach((backgroundImg, index) => {
+
+      backgroundImages.forEach((backgroundImg, index, arr) => {
         if (index > 0) {
         var nextCanvasContainer = canvasContainer.cloneNode(true);
         var newCanvasElement = nextCanvasContainer.firstElementChild;
@@ -103,28 +91,52 @@
       CANVAS_HEIGHT = canvasElement.height = embedCode.clientHeight;
       ctx = canvasElement.getContext('2d');
       ctx.drawImage(COVER_IMAGE, 0, 0, canvasElement.width, canvasElement.height);
+      drawTextInsertHoverIMG(ctx);
       arrayCanvas.push(canvasElement);
       canvasElement.addEventListener('mousedown', selectCanvas);
       canvasElement.addEventListener('touchstart', selectCanvas);
     });
-
-      for (let i = 0; i < textHover.length; i++) {
-        console.log(`textHover[${i}]`, textHover[i]);
-        ctx.fillStyle = textHover[i].fontColor;
-        ctx.font = `${textHover[i].fontStyle} ${textHover[i].fontSize} ${textHover[i].fontFamily}`;
-        let oneRow = textHover[i].content;
-        ctx.fillText(oneRow, textHover[i].XCenter, textHover[i].Ycor);
-      }
     };
     main();
-    /*hide cover image from redactor*/
+
+    /* draw text set text in center canvas */
+    function drawTextInsertHoverIMG(currentCtx) {
+      currentCtx.textAlign = 'center';
+      currentCtx.textBaseline = 'top';
+
+      TEXT_FROM_CANVAS.forEach(oneStringSpan => {
+        if (!oneStringSpan.closest('.winnercode')) {
+        textHover.push({
+          content: oneStringSpan.textContent,
+          fontColor: oneStringSpan.style.color,
+          fontSize: oneStringSpan.style.fontSize,
+          fontStyle: oneStringSpan.style.fontStyle,
+          fontFamily: oneStringSpan.style.fontFamily,
+          XCenter: oneStringSpan.parentElement.offsetLeft + oneStringSpan.parentElement.clientWidth / 2,
+          Ycor: oneStringSpan.parentElement.offsetTop,
+        });
+        oneStringSpan.style.visibility = 'hidden';
+        oneStringSpan.parentElement.style.visibility = 'hidden';
+        if (oneStringSpan.firstElementChild) oneStringSpan.firstElementChild.style.visibility = 'hidden';
+      }
+    });
+
+      textHover.forEach(oneText => {
+        /*   console.log(`textHover[${i}]`, textHover[i]);*/
+        currentCtx.fillStyle = oneText.fontColor;
+        currentCtx.font = `${oneText.fontStyle} ${oneText.fontSize} ${oneText.fontFamily}`;
+        let oneRow = oneText.content;
+        currentCtx.fillText(oneRow, oneText.XCenter, oneText.Ycor);
+      });
+    }
+
+    /*hide  image for cover from redactor*/
     tabIndex.querySelectorAll('.element-image').forEach((wrapperImg) => {
       if (wrapperImg.querySelector('IMG').src.includes(urlCoverImage)) wrapperImg.style.display = 'none';
   });
 
     function handleMouseDown(event) {
       isDrawing = true;
-      console.log('this', this);
       /*lastPoint = getMouseСoordinates(event, this); todo*/
       lastPoint = getMouseСoordinates(event, canvasElement);
     }
@@ -137,16 +149,12 @@
       if (canvas.offsetParent !== undefined) {
         do {
           offsetX += canvas.offsetLeft;
-          offsetY += canvas.offsetTop; /* while has Pearent with positions, we up on top*/
+          offsetY += canvas.offsetTop;
+          /* while has Pearent with positions, we up on top*/
         } while ((canvas = canvas.offsetParent));
       }
       mx = (event.pageX || event.touches[0].pageX) - offsetX;
       my = (event.pageY || event.touches[0].pageY) - offsetY;
-      /*  console.log('event.pageX-', event.touches[0].pageX);
-        console.log('offsetX-', offsetX);
-        console.log('offsetY-', offsetY);
-        console.log('mx-', mx);
-        console.log('my-', my);*/
       return {
         x: mx,
         y: my

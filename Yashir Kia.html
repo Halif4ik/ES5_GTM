@@ -1,0 +1,53 @@
+<!--GTM  ES5  for SHow campaign NEW 30 camp 24_08   window.KiaSportage2017 -->
+<script>
+    (function () {
+        Promise.all([
+            sendRequest('KiaSportage2017', 'https://feeds.datafeedwatch.com/70003/d4cacec949b426abf1eb43f9a1d2770cfa984a6c.xml'),
+            sendRequest('KiaSportage2016', 'https://feeds.datafeedwatch.com/70003/577ab17d1c0973452cbd10a58ae0cdaa9e44a296.xml'),
+            sendRequest('ToyotaCorolla2018', 'https://feeds.datafeedwatch.com/70003/9d6eb60cf0638ae1a7481dc4d3abe3300b185ece.xml'),
+            sendRequest('NissanQashqai2018', 'https://feeds.datafeedwatch.com/70003/0878ffa4da09e8ff6c31605e991801d4ea83b4da.xml'),
+            sendRequest('NissanQashqai2017', 'https://feeds.datafeedwatch.com/70003/dc4dd1e6ce0db594a303b70bdb4192a6760b407a.xml'),
+            sendRequest('ToyotaYaris2018', 'https://feeds.datafeedwatch.com/70003/8ff1a0853ed0d232770a0fdfc9e68651400a526a.xml'),
+            sendRequest('SkodaOctavia2019', 'https://feeds.datafeedwatch.com/70003/9e089a175592fd8f43597cda4e9636a3a0a501a0.xml'),
+            sendRequest('SkodaOctavia2018', 'https://feeds.datafeedwatch.com/70003/945a4dcc2778bd576ebbbea9849173137a17268e.xml'),
+            sendRequest('NissanQashqai2016', 'https://feeds.datafeedwatch.com/70003/1532aa76264fd67e50b3a7393e03b9ddd25466ee.xml'),
+            sendRequest('HyundaiTucson2017', 'https://feeds.datafeedwatch.com/70003/26c0394751f6c002c7329c616e5eff39bf534469.xml'),
+            sendRequest('HyundaiTucson2019', 'https://feeds.datafeedwatch.com/70003/a8cc70557d39f167c7c5397bc2f934d76f8b7756.xml'),
+            sendRequest('HyundaiTucson2018', 'https://feeds.datafeedwatch.com/70003/adf863d0575e6f867c6480d1f9945625f3ebeffa.xml'),
+            sendRequest('KiaNiro2017', 'https://feeds.datafeedwatch.com/70003/cdd65ebda9392c9f5c652b24fc215652eae7d4bb.xml'),
+            sendRequest('KiaPicanto2016', 'https://feeds.datafeedwatch.com/70003/2f7c9a17ebcad2e81de12ff2fa8e7a33cded6d17.xml'),
+            sendRequest('MitsubishiASX2019', 'https://feeds.datafeedwatch.com/70003/efee4a415427e98bd9a994e5403143ef54316b13.xml'),
+            sendRequest('Hyundaii202018', 'https://feeds.datafeedwatch.com/70003/a7c46526872d06a9143fe372bd72062534256d95.xml'),
+            sendRequest('Hyundaii102019', 'https://feeds.datafeedwatch.com/70003/1daba71029f8ab87362e1ef9db5ca21216ee639a.xml'),
+            sendRequest('MitsubishiOutlander2019', 'https://feeds.datafeedwatch.com/70003/9e30c3bf5b03766c08ff571f52f608192146db0f.xml'),
+            sendRequest('NissanMicra2018', 'https://feeds.datafeedwatch.com/70003/2b1094c0baf906b5ddf4dc8707c638683a32ad94.xml'),
+            sendRequest('SkodaRapid2018', 'https://feeds.datafeedwatch.com/70003/9a34d34406fbf5e63001699abf3c746778f83c39.xml'),
+            sendRequest('Mazda32016', 'https://feeds.datafeedwatch.com/70003/342606b4ac977960b520b4d856d12e0e6f70cd79.xml'),
+            sendRequest('ToyotaCorolla2017', 'https://feeds.datafeedwatch.com/70003/9588a6ab86c66f543b1249bc7404c7fe5be44db7.xml'),
+            sendRequest('MitsubishiOutlander2016', 'https://feeds.datafeedwatch.com/70003/1d10a815bd8de7581c59bcad15e810e607e2332d.xml'),
+        ]).then(function (responses) {
+            for (var i = 0; i < responses.length; i++) {
+                window[responses[i][0]] = responses[i][1];
+            }
+        });
+
+        function sendRequest(nameCar, dataSourceUrl) {
+            return new Promise(function (resolve) {
+                var data = null;
+                var xhr = new XMLHttpRequest();
+                xhr.withCredentials = true;
+                xhr.addEventListener('readystatechange', function () {
+                    if (this.readyState === 4) {
+                        var thispars = new DOMParser().parseFromString(this.response, "text/xml");
+                        var countItems = thispars.querySelectorAll('item').length;
+                        resolve([nameCar, countItems > 2])
+                    }
+                });
+                xhr.open('GET', dataSourceUrl);
+                xhr.setRequestHeader('cache-control', 'no-cache');
+                xhr.send(data);
+            })
+        }
+
+    })();
+</script>

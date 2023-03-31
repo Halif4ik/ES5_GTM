@@ -1,0 +1,37 @@
+<script>
+    (function () {
+        addToCart();
+        function addToCart() {
+            const action = 'aHR0cHM6Ly9jZWxsY29tc2hvcC5jZWxsY29tLmNvLmlsL3N2cHItYmFuZGwtcHM1Lmh0bWw';
+            const id = '3252'; /* #product_addtocart_form > input[name="product"] */
+            const form_key = 'Ya3BxCj9XSZfabQH'; /*cooki*/
+            const color_attribute = '6'; /* document.querySelector('#product-options-wrapper > div > div.swatch-opt .swatch-option.selected').dataset.optionId */
+
+            var LINK_IN_FORM_ACTION = `https://cellcomshop.cellcom.co.il/checkout/cart/add/uenc/${action}%2C/product/${id}/`;
+            const formData = new FormData();
+            const xhr = new XMLHttpRequest();
+            try {
+
+                formData.append("product", id);
+                formData.append("selected_configurable_option", "");
+                formData.append("item", id);
+                formData.append("form_key", form_key);
+                formData.append("super_attribute[93]", color_attribute);
+                formData.append("options[202][]", "610");
+                formData.append("qty", "1");
+
+                xhr.open("POST", LINK_IN_FORM_ACTION);
+                xhr.setRequestHeader('x-requested-with', 'XMLHttpRequest');
+                xhr.onload = function () {
+                    if (xhr.status == 200) {
+                        console.log("POST");
+                        require('Magento_Customer/js/customer-data').reload();
+                    }
+                };
+                xhr.send(formData);
+            } catch (e) {
+                console.log("Post dont sended " + e);
+            }
+        }
+    })();
+</script>

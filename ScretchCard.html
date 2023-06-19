@@ -1,21 +1,21 @@
 <style>
-  #adoric_smartbox_01cdcd2e3e80a .canvasContainer {
+  #adoric_smartbox_edefc93f2d294 .canvasContainer {
     position: relative;
     z-index: 9999999999;
   }
 
 
-  #adoric_smartbox_01cdcd2e3e80a {
+  #adoric_smartbox_edefc93f2d294 {
     z-index: 9999999999;
   }
 
-  #adoric_smartbox_01cdcd2e3e80a .canvas {
+  #adoric_smartbox_edefc93f2d294 .canvas {
     position: absolute;
     top: 0;
     left: 0;
   }
 
-  #adoric_smartbox_01cdcd2e3e80a .element-image IMG {
+  #adoric_smartbox_edefc93f2d294 .element-image IMG {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -26,7 +26,7 @@
 </div>
 <script>
   (function () {
-    const urlCoverImage = 'https://static.adoric.com/fef7795e-e44b-4088-83c9-b348accf43e7.png';
+    const urlCoverImage = 'https://storage.googleapis.com/adoric-user-images/ba2753ab-47e2-406e-b2b1-ff5e9fb0da7e.png';
     const LIMIT_TO_SHOW_ALL_PERCENTAGE = 30;
     const brushWidth = 80;
     const brusHeight = 50;
@@ -142,7 +142,7 @@
       });
 
       /*  console.log('textHoverARR', textHover);*/
-      textHover.forEach(function (oneText,i) {
+      textHover.forEach(function (oneText, i) {
         /*console.log(`textHover[${i}]`, textHover[i]);*/
         currentCtx.fillStyle = oneText.fontColor;
         currentCtx.font = `${oneText.fontStyle} ${oneText.fontSize} ${oneText.fontFamily}`;
@@ -156,24 +156,30 @@
       if (wrapperImg.querySelector('IMG').src.includes(urlCoverImage)) wrapperImg.style.display = 'none';
     });
 
-
     /*mousedown coordinates take and calculete cord from border Adoric*/
     function getMouseСoordinates(event, canvas) {
-      var offsetX = 0,
-              offsetY = window.scrollY,
-              mx, my;
+      const rect = canvas.getBoundingClientRect();
+      var NEWx = (event.clientX || event.touches[0].clientX) - rect.left;
+      var NEWy = (event.clientY || event.touches[0].clientY) - rect.top;
+      /* console.log('NEWx-', NEWx);
+       console.log('NEWy-', NEWy);*/
+      /*var offsetX = 0,
+          offsetY = window.scrollY,
+          mx, my;
       if (canvas.offsetParent !== undefined) {
-        do {
-          offsetX += canvas.offsetLeft;
-          offsetY += canvas.offsetTop;
-          /* while has Pearent with positions, we up on top*/
-        } while ((canvas = canvas.offsetParent));
+          do {
+              offsetX += canvas.offsetLeft;
+              offsetY += canvas.offsetTop;
+              /!* while has Pearent with positions, we up on top*!/
+          } while ((canvas = canvas.offsetParent));
       }
       mx = (event.pageX || event.touches[0].pageX) - offsetX;
       my = (event.pageY || event.touches[0].pageY) - offsetY;
+      console.log('mx-', mx);
+      console.log('my-', my);*/
       return {
-        x: mx,
-        y: my
+        x: NEWx,
+        y: NEWy
       };
     }
 
@@ -217,7 +223,7 @@
 
     function handlePercentage(filledInPixels) {
       filledInPixels = filledInPixels || 0;
-      console.log(filledInPixels + '%');
+      /*console.log(filledInPixels + '%');*/
       if (filledInPixels > LIMIT_TO_SHOW_ALL_PERCENTAGE + 1) {
         return null;
       }
@@ -226,6 +232,7 @@
           if (canvasElement && canvasElement.parentNode) {
             canvasElement.parentNode.removeChild(canvasElement);
             canvasContainer.style.zIndex = '0';
+            embedCode.style.zIndex = '0';
           }
         }, 50);
       }
@@ -241,12 +248,13 @@
     /*when moving above canvas*/
     function handleMouseMove(e) {
       if (!isDrawing) return;
-      /*for mobile stop scroll screen*/
-      e.preventDefault();
+
+
       var currentPoint = getMouseСoordinates(e, canvasElement),
               dist = distanceBetween(lastPoint, currentPoint),
               angle = angleBetween(lastPoint, currentPoint),
               x, y;
+
       for (var i = 0; i < dist; i++) {
         x = lastPoint.x + (Math.sin(angle) * i) - 25;
         y = lastPoint.y + (Math.cos(angle) * i) - 25;
@@ -254,6 +262,8 @@
         ctx.drawImage(brush, x, y, brushWidth, brusHeight);
       }
       lastPoint = currentPoint;
+      /*for mobile stop scroll screen*/
+      e.preventDefault();
       handlePercentage(getFilledInPixels(step));
     }
 
